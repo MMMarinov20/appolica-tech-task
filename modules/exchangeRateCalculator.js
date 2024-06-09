@@ -1,15 +1,20 @@
 import fs from "fs";
 import { conversions } from "./config.js";
-import { fetchExchangeRate } from "./utils.js";
-export const calculateExchangeRate = async (date, amount, currency) => {
-  const exchangeRates = await fetchExchangeRate(date, currency[0]);
+import { fetchExchangeRate } from "./cache.js";
+export const calculateExchangeRate = async (
+  date,
+  amount,
+  baseCurrency,
+  targetCurrency
+) => {
+  const exchangeRates = await fetchExchangeRate(date, baseCurrency);
 
   const conversion = {
     date: date,
     amount: amount,
-    base_currency: currency[0],
-    target_currency: currency[1],
-    converted_amount: amount * exchangeRates[currency[1]],
+    base_currency: baseCurrency,
+    target_currency: targetCurrency,
+    converted_amount: amount * exchangeRates[targetCurrency],
   };
   conversions.push(conversion);
   fs.writeFileSync(
@@ -18,6 +23,6 @@ export const calculateExchangeRate = async (date, amount, currency) => {
   );
 
   console.log(
-    `${amount} ${currency[0]} is ${conversion.converted_amount} ${currency[1]}`
+    `${amount} ${baseCurrency} is ${conversion.converted_amount} ${targetCurrency}`
   );
 };
